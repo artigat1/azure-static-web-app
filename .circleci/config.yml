@@ -131,21 +131,6 @@ jobs:
           command: |
             echo '<build build='"\"$CIRCLE_BUILD_NUM"\"' url='"\"$CIRCLE_BUILD_URL"\"' timestamp='"\"$(date)"\"'><github sha='"\"$CIRCLE_SHA1"\"' url='"\"https://github.com/mporium/mporium.web-app/commit/$CIRCLE_SHA1"\"'></github></build>' > ./build.xml
             mv ./build.xml dist
-      - run:
-          name: Generate JS Doc for Impact
-          command: npm run doc:build:ci
-      - run:
-          name: Move documentation to impact dist
-          command: mv documentation dist/docs
-      - store_artifacts:
-          path: dist/docs
-          destination: docs
-      - run:
-          name: Move code coverage reports
-          command: mv coverage dist/coverage
-      - store_artifacts:
-          path: dist/coverage
-          destination: coverage
       - run: *delete_node_modules
       - persist_to_workspace: *workspace_config
 
