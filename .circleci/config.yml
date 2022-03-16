@@ -182,9 +182,7 @@ workflows:
                 - master
       - deploy:
           requires:
-            - build
-            - lint
-            - unit_tests
+            - docs
           filters:
             branches:
               only:
