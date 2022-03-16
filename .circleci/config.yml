@@ -175,6 +175,16 @@ workflows:
           requires:
             - build
             - lint
+            - unit_tests
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          requires:
+            - build
+            - lint
+            - unit_tests
           filters:
             branches:
               only:
