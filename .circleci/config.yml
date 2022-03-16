@@ -70,26 +70,26 @@ jobs:
           name: linting the project
           command: npm run lint
 
-#  unit_tests:
-#    <<: *docker-config
-#    steps:
-#      - *fast-checkout
-#      - restore_cache: *root_package_lock_key
-#      - run:
-#          name: App Unit tests
-#          command: npm run test:unit:ci
-#          environment:
-#            JEST_JUNIT_OUTPUT_DIR: ./output/unit-tests/reports
-#      - store_test_results:
-#          path: ./output/unit-tests/reports
-#      - save_cache:
-#          <<: *root_package_lock_key
-#          paths:
-#            - ~/.npm
-#            - ~/.cache
-#            - ~/tmp/node_modules
-#      - run: *delete_node_modules
-#      - persist_to_workspace: *workspace_config
+  unit_tests:
+    <<: *docker-config
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: App Unit tests
+          command: npm run test:unit:ci
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./output/unit-tests/reports
+      - store_test_results:
+          path: ./output/unit-tests/reports
+      - save_cache:
+          <<: *root_package_lock_key
+          paths:
+            - ~/.npm
+            - ~/.cache
+            - ~/tmp/node_modules
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
 
   e2e:
     <<: *docker-config
@@ -147,7 +147,7 @@ jobs:
       - run:
           name: Deploy the app
           command: |
-            /bin/staticsites/StaticSitesClient upload --verbose --app ./dist --skipAppBuild true --apiToken $STATIC_WEB_APP_DEPLOYMENT_KEY --slot $CIRCLE_BUILD_NUM
+            /bin/staticsites/StaticSitesClient upload --verbose --app ./dist --skipAppBuild true --skipApiBuild true --apiToken $STATIC_WEB_APP_DEPLOYMENT_KEY
       - run: *delete_node_modules
       - persist_to_workspace: *workspace_config
 
