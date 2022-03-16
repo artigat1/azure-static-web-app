@@ -129,7 +129,7 @@ jobs:
       - run:
           name: Generate build xml
           command: |
-            echo '<build build='"\"$CIRCLE_BUILD_NUM"\"' url='"\"$CIRCLE_BUILD_URL"\"' timestamp='"\"$(date)"\"'><github sha='"\"$CIRCLE_SHA1"\"' url='"\"https://github.com/mporium/mporium.web-app/commit/$CIRCLE_SHA1"\"'></github></build>' > ./build.xml
+            echo '<build build='"\"$CIRCLE_BUILD_NUM"\"' url='"\"$CIRCLE_BUILD_URL"\"' timestamp='"\"$(date)"\"'><github sha='"\"$CIRCLE_SHA1"\"' url='"\"https://github.com/orbitalwitness/legal-web-app/commit/$CIRCLE_SHA1"\"'></github></build>' > ./build.xml
             mv ./build.xml dist
       - run: *delete_node_modules
       - persist_to_workspace: *workspace_config
