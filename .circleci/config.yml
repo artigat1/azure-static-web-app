@@ -77,11 +77,11 @@ jobs:
       - restore_cache: *root_package_lock_key
       - run:
           name: App Unit tests
-          command: jest --ci --runInBand --reporters=default --reporters=jest-junit
+          command: npm run test:unit:ci
           environment:
-            JEST_JUNIT_OUTPUT_DIR: ./output/reports/junit/
+            JEST_JUNIT_OUTPUT_DIR: ./output/unit-tests/reports
       - store_test_results:
-          path: ./output/reports/junit
+          path: ./output/unit-tests/reports
       - save_cache:
           <<: *root_package_lock_key
           paths:
