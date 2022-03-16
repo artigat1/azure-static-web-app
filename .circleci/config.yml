@@ -1,0 +1,197 @@
+﻿version: 2.1
+
+####
+# Variables
+####
+var_1: &working_directory ~/tmp
+var_2: &cache_key ow.web-app-{{ checksum "package-lock.json" }}
+
+####
+# Anchors
+####
+anchor_1: &docker-config
+  working_directory: *working_directory
+  docker:
+    - image: cimg/node:14.18.2-browsers
+  orbs:
+    cypress: cypress-io/cypress@1
+  environment:
+    TZ: 'Europe/London'
+    TERM: xterm
+
+anchor_2: &root_package_lock_key
+  key: *cache_key
+
+anchor_3: &fast-checkout
+  attach_workspace:
+    at: *working_directory
+
+anchor_4: &workspace_config
+  root: *working_directory
+  paths:
+    - .
+
+anchor_5: &delete_node_modules
+  name: Delete node_modules so we can persist quickly
+  command: rm -R -f ~/tmp/node_modules
+
+####
+# Jobs
+####
+jobs:
+  checkout:
+    <<: *docker-config
+    steps:
+      - checkout
+      # Log the current branch
+      - run:
+          name: show current branch
+          command: echo ${CIRCLE_BRANCH}
+      - run: rm -rf .git
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: install-dependencies
+          command: |
+            npm ci
+      - save_cache:
+          <<: *root_package_lock_key
+          paths:
+            - ~/.npm
+            - ~/.cache
+            - ~/tmp/node_modules
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
+
+  lint:
+    <<: *docker-config
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: linting the project
+          command: npm run lint
+
+  unit_tests:
+    <<: *docker-config
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: App Unit tests
+          command: npm run test:unit
+      - store_test_results:
+          path: 'reports/junit'
+      - store_artifacts:
+          path: 'reports/junit'
+          destination: unit-tests
+      - save_cache:
+          <<: *root_package_lock_key
+          paths:
+            - ~/.npm
+            - ~/.cache
+            - ~/tmp/node_modules
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
+
+  e2e:
+    <<: *docker-config
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: App e2e tests
+          command: npm run test:e2e
+      - store_artifacts:
+          path: output/e2e/videos
+          destination: e2e
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
+
+  build:
+    <<: *docker-config
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: Build the app
+          command: >-
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                npm run build
+            else
+                npm run build:dev
+            fi
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
+
+  docs:
+    <<: *docker-config
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: Generate build xml
+          command: |
+            echo '<build build='"\"$CIRCLE_BUILD_NUM"\"' url='"\"$CIRCLE_BUILD_URL"\"' timestamp='"\"$(date)"\"'><github sha='"\"$CIRCLE_SHA1"\"' url='"\"https://github.com/mporium/mporium.web-app/commit/$CIRCLE_SHA1"\"'></github></build>' > ./build.xml
+            mv ./build.xml dist
+      - run:
+          name: Generate JS Doc for Impact
+          command: npm run doc:build:ci
+      - run:
+          name: Move documentation to impact dist
+          command: mv documentation dist/docs
+      - store_artifacts:
+          path: dist/docs
+          destination: docs
+      - run:
+          name: Move code coverage reports
+          command: mv coverage dist/coverage
+      - store_artifacts:
+          path: dist/coverage
+          destination: coverage
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
+
+####
+# Workflows
+####
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - checkout
+      - lint:
+          requires:
+            - checkout
+      - unit_tests:
+          requires:
+            - checkout
+       - e2e:
+          requires:
+             - checkout
+      - build:
+          requires:
+            - checkout
+      - docs:
+          requires:
+            - build
+            - lint
+          filters:
+            branches:
+              only:
+                - master
+      - components:
+          requires:
+            - build
+            - lint
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          requires:
+            - docs
+          filters:
+            branches:
+              only:
+                - dev
+                - master
