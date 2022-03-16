@@ -80,9 +80,6 @@ jobs:
           command: npm run test:unit
       - store_test_results:
           path: 'reports/junit'
-      - store_artifacts:
-          path: 'reports/junit'
-          destination: unit-tests
       - save_cache:
           <<: *root_package_lock_key
           paths:
