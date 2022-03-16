@@ -165,7 +165,7 @@ workflows:
       - unit_tests:
           requires:
             - checkout
-       - e2e:
+      - e2e:
           requires:
              - checkout
       - build:
@@ -178,20 +178,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
-      - components:
-          requires:
-            - build
-            - lint
-          filters:
-            branches:
-              only:
-                - master
-      - deploy:
-          requires:
-            - docs
-          filters:
-            branches:
-              only:
-                - dev
                 - master
