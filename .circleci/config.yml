@@ -134,6 +134,23 @@ jobs:
       - run: *delete_node_modules
       - persist_to_workspace: *workspace_config
 
+  deploy:
+    working_directory: *working_directory
+    docker:
+      - image: mcr.microsoft.com/appsvc/staticappsclient:stable
+    environment:
+      TZ: 'Europe/London'
+      TERM: xterm
+    steps:
+      - *fast-checkout
+      - restore_cache: *root_package_lock_key
+      - run:
+          name: Deploy the app
+          command: |
+            /bin/staticsites/StaticSitesClient upload --verbose --app ./dist --skipAppBuild true --apiToken $STATIC_WEB_APP_DEPLOYMENT_KEY
+      - run: *delete_node_modules
+      - persist_to_workspace: *workspace_config
+
 ####
 # Workflows
 ####
