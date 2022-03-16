@@ -13,8 +13,6 @@ anchor_1: &docker-config
   working_directory: *working_directory
   docker:
     - image: cimg/node:14.18.2-browsers
-  orbs:
-    cypress: cypress-io/cypress@1
   environment:
     TZ: 'Europe/London'
     TERM: xterm
