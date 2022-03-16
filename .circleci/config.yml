@@ -148,9 +148,9 @@ workflows:
       - unit_tests:
           requires:
             - checkout
-      - e2e:
-          requires:
-             - checkout
+#      - e2e:
+#          requires:
+#             - checkout
       - build:
           requires:
             - checkout
