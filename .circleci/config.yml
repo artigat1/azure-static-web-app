@@ -13,6 +13,7 @@ anchor_1: &docker-config
   working_directory: *working_directory
   docker:
     - image: cimg/node:14.18.2-browsers
+  resource_class: small
   environment:
     TZ: 'Europe/London'
     TERM: xterm
