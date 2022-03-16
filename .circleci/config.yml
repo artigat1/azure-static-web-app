@@ -70,26 +70,26 @@ jobs:
           name: linting the project
           command: npm run lint
 
-  unit_tests:
-    <<: *docker-config
-    steps:
-      - *fast-checkout
-      - restore_cache: *root_package_lock_key
-      - run:
-          name: App Unit tests
-          command: npm run test:unit:ci
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./output/unit-tests/reports
-      - store_test_results:
-          path: ./output/unit-tests/reports
-      - save_cache:
-          <<: *root_package_lock_key
-          paths:
-            - ~/.npm
-            - ~/.cache
-            - ~/tmp/node_modules
-      - run: *delete_node_modules
-      - persist_to_workspace: *workspace_config
+#  unit_tests:
+#    <<: *docker-config
+#    steps:
+#      - *fast-checkout
+#      - restore_cache: *root_package_lock_key
+#      - run:
+#          name: App Unit tests
+#          command: npm run test:unit:ci
+#          environment:
+#            JEST_JUNIT_OUTPUT_DIR: ./output/unit-tests/reports
+#      - store_test_results:
+#          path: ./output/unit-tests/reports
+#      - save_cache:
+#          <<: *root_package_lock_key
+#          paths:
+#            - ~/.npm
+#            - ~/.cache
+#            - ~/tmp/node_modules
+#      - run: *delete_node_modules
+#      - persist_to_workspace: *workspace_config
 
   e2e:
     <<: *docker-config
@@ -162,9 +162,9 @@ workflows:
       - lint:
           requires:
             - checkout
-      - unit_tests:
-          requires:
-            - checkout
+#      - unit_tests:
+#          requires:
+#            - checkout
 #      - e2e:
 #          requires:
 #             - checkout
@@ -175,7 +175,7 @@ workflows:
           requires:
             - build
             - lint
-            - unit_tests
+#            - unit_tests
           filters:
             branches:
               only:
